@@ -1,4 +1,4 @@
-package academy.devdojo.maratonajava.javacore.ZZEstreams.dominio.test;
+package academy.devdojo.maratonajava.javacore.ZZEstreams.test;
 
 
 import academy.devdojo.maratonajava.javacore.ZZEstreams.dominio.LightNovel;
@@ -6,10 +6,12 @@ import academy.devdojo.maratonajava.javacore.ZZEstreams.dominio.LightNovel;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 //1 . Order LightNovel by title
 //2. Retrieve the first 3 titles light novels with price less than 4
-public class StreamTest01 {
+public class StreamTest03 {
     private static List<LightNovel> lightNovels = new ArrayList<>(List.of(
             new LightNovel("Tensei Shittara", 8.99),
             new LightNovel("Overlord", 3.99),
@@ -17,21 +19,21 @@ public class StreamTest01 {
             new LightNovel("No Game No Life", 2.99),
             new LightNovel("Fullmetal Alchemist", 5.99),
             new LightNovel("Kumo desuga", 1.99),
+            new LightNovel("Kumo desuga", 1.99),
             new LightNovel("Monogatari", 4.00)
     ));
     public static void main(String[] args) {
-        lightNovels.sort(Comparator.comparing(LightNovel::getTitle));
-        List<String> titles = new ArrayList<>();
-        for (LightNovel lightNovel : lightNovels) {
-            if (lightNovel.getPrice() <= 4) {
-                titles.add(lightNovel.getTitle());
-            }
-            if (titles.size() >=3) {
-                break;
-            }
-        }
+        Stream<LightNovel> stream = lightNovels.stream();
+        lightNovels.forEach(System.out::println);
 
-        System.out.println(lightNovels);
-        System.out.println(titles);
+//        long count = stream.filter(ln -> ln.getPrice() <= 4).count();
+
+        long count2 = lightNovels.stream()
+                .distinct()
+                .filter(ln -> ln.getPrice() <= 4)
+                .count();
+
+//        System.out.println(count);
+        System.out.println(count2);
     }
 }

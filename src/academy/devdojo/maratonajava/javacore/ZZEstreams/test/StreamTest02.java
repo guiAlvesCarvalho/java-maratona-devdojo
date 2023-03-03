@@ -1,4 +1,4 @@
-package academy.devdojo.maratonajava.javacore.ZZEstreams.dominio.test;
+package academy.devdojo.maratonajava.javacore.ZZEstreams.test;
 
 
 import academy.devdojo.maratonajava.javacore.ZZEstreams.dominio.LightNovel;
@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 //1 . Order LightNovel by title
 //2. Retrieve the first 3 titles light novels with price less than 4
-public class StreamTest03 {
+public class StreamTest02 {
     private static List<LightNovel> lightNovels = new ArrayList<>(List.of(
             new LightNovel("Tensei Shittara", 8.99),
             new LightNovel("Overlord", 3.99),
@@ -19,21 +19,16 @@ public class StreamTest03 {
             new LightNovel("No Game No Life", 2.99),
             new LightNovel("Fullmetal Alchemist", 5.99),
             new LightNovel("Kumo desuga", 1.99),
-            new LightNovel("Kumo desuga", 1.99),
             new LightNovel("Monogatari", 4.00)
     ));
     public static void main(String[] args) {
-        Stream<LightNovel> stream = lightNovels.stream();
-        lightNovels.forEach(System.out::println);
-
-//        long count = stream.filter(ln -> ln.getPrice() <= 4).count();
-
-        long count2 = lightNovels.stream()
-                .distinct()
+        List<String> titles = lightNovels.stream()
+                .sorted(Comparator.comparing(LightNovel::getTitle))
                 .filter(ln -> ln.getPrice() <= 4)
-                .count();
+                .limit(3)
+                .map(LightNovel::getTitle)
+                .collect(Collectors.toList());
 
-//        System.out.println(count);
-        System.out.println(count2);
+        System.out.println(titles);
     }
 }

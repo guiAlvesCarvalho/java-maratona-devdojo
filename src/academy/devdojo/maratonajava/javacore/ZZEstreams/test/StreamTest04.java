@@ -1,4 +1,4 @@
-package academy.devdojo.maratonajava.javacore.ZZEstreams.dominio.test;
+package academy.devdojo.maratonajava.javacore.ZZEstreams.test;
 
 import java.util.ArrayList;
 import java.util.Collection;
