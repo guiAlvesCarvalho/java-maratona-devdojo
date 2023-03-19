@@ -111,25 +111,133 @@ public class ProducerRepository {
         String sql = "SELECT * FROM anime_store.producer";
         try (Connection conn = ConnectionFactory.getConnection()) {
             DatabaseMetaData dbMetaData = conn.getMetaData();
-            if (dbMetaData.supportsResultSetType(ResultSet.TYPE_FORWARD_ONLY)){
+            if (dbMetaData.supportsResultSetType(ResultSet.TYPE_FORWARD_ONLY)) {
                 log.info("Supports TYPE_FORWARD_ONLY");
-                if (dbMetaData.supportsResultSetConcurrency(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE)){
+                if (dbMetaData.supportsResultSetConcurrency(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE)) {
                     log.info("And Supports CONCUR_UPDATABLE");
                 }
             }
-            if (dbMetaData.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE)){
+            if (dbMetaData.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE)) {
                 log.info("Supports TYPE_SCROLL_INSENSITIVE");
-                if (dbMetaData.supportsResultSetConcurrency(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)){
+                if (dbMetaData.supportsResultSetConcurrency(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
                     log.info("And Supports CONCUR_UPDATABLE");
                 }
             }
-            if (dbMetaData.supportsResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE)){
+            if (dbMetaData.supportsResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE)) {
                 log.info("Supports TYPE_FORWARD_ONLY");
-                if (dbMetaData.supportsResultSetConcurrency(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE)){
+                if (dbMetaData.supportsResultSetConcurrency(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
                     log.info("And Supports CONCUR_UPDATABLE");
                 }
             }
 
+        } catch (SQLException e) {
+            log.error("Error while trying to find all producers", e);
+        }
+    }
+
+    public static void showTypeScrollWorking() {
+
+        String sql = "SELECT * FROM anime_store.producer;";
+        try (Connection conn = ConnectionFactory.getConnection();
+             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+             ResultSet rs = stmt.executeQuery(sql)) {
+            log.info("Last Row? '{}'", rs.last());
+            log.info("Row Number? '{}'", rs.getRow());
+            log.info(Producer.builder().id(rs.getInt("id")).name(rs.getString("name")).build());
+
+            log.info("First Row? '{}'", rs.first());
+            log.info("Row Number? '{}'", rs.getRow());
+            log.info(Producer.builder().id(rs.getInt("id")).name(rs.getString("name")).build());
+
+            log.info("Row Absolute? '{}'", rs.absolute(2));
+            log.info("Row Number? '{}'", rs.getRow());
+            log.info(Producer.builder().id(rs.getInt("id")).name(rs.getString("name")).build());
+
+            log.info("Row Relative? '{}'", rs.absolute(-1));
+            log.info("Row Number? '{}'", rs.getRow());
+            log.info(Producer.builder().id(rs.getInt("id")).name(rs.getString("name")).build());
+
+            log.info("is last? '{}'", rs.isLast());
+            log.info("Row number '{}'", rs.getRow());
+
+            log.info("is first? '{}'", rs.isFirst());
+            log.info("Row number '{}'", rs.getRow());
+
+            log.info("Last row? '{}'", rs.last());
+            log.info("------------------------------");
+            rs.next();
+            log.info("After last row? '{}'", rs.isAfterLast());
+            while (rs.previous()) {
+                log.info(Producer.builder().id(rs.getInt("id")).name(rs.getString("name")).build());
+
+
+            }
+
+        } catch (SQLException e) {
+            log.error("Error while trying to find all producers", e);
+        }
+    }
+
+    public static List<Producer> findByNameAndUpdateToUpperCase(String name) {
+        log.info("Finding producer by name");
+        String sql = "SELECT * FROM producer WHERE name like '%%%s%%';".formatted(name);
+        List<Producer> producers = new ArrayList<>();
+        try (Connection conn = ConnectionFactory.getConnection();
+             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                rs.updateString("name", rs.getString("name").toUpperCase());
+//                rs.cancelRowUpdates();
+                rs.updateRow();
+                Producer producer = Producer
+                        .builder()
+                        .id(rs.getInt("id"))
+                        .name(rs.getString("name"))
+                        .build();
+                producers.add(producer);
+            }
+        } catch (SQLException e) {
+            log.error("Error while trying to find all producers", e);
+        }
+        return producers;
+    }
+
+    public static List<Producer> findByNameAndInsertWhenNotFound(String name) {
+        log.info("Finding producer by name");
+        String sql = "SELECT * FROM producer WHERE name like '%%%s%%';".formatted(name);
+        List<Producer> producers = new ArrayList<>();
+        try (Connection conn = ConnectionFactory.getConnection();
+             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) return producers;
+            rs.moveToInsertRow();
+            rs.updateString("name", name);
+            rs.insertRow();
+            rs.beforeFirst();
+            rs.next();
+            Producer producer = Producer
+                    .builder()
+                    .id(rs.getInt("id"))
+                    .name(rs.getString("name"))
+                    .build();
+            producers.add(producer);
+        } catch (SQLException e) {
+            log.error("Error while trying to find all producers", e);
+        }
+        return producers;
+    }
+
+    public static void findByNameAndDelete(String name) {
+        log.info("Finding producer by name");
+        String sql = "SELECT * FROM producer WHERE name like '%%%s%%';".formatted(name);
+        List<Producer> producers = new ArrayList<>();
+        try (Connection conn = ConnectionFactory.getConnection();
+             Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()){
+                log.info("Deleting '{}'", rs.getString("name"));
+                rs.deleteRow();
+            }
         } catch (SQLException e) {
             log.error("Error while trying to find all producers", e);
         }
