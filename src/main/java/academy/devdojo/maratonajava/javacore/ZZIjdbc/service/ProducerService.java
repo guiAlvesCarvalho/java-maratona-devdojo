@@ -46,6 +46,15 @@ public class ProducerService {
         ProducerRepository.findByNameAndDelete(name);
     }
 
+    public static List<Producer> findByNamePreparedStatement(String name){
+        return ProducerRepository.findByNamePreparedStatement(name);
+    }
+
+    public static void updatePreparedStatement(Producer producer){
+        requireValidId(producer.getId());
+        ProducerRepository.updatePreparedStatement(producer);
+    }
+
     private static void requireValidId(Integer id){
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Invalid value for id");
